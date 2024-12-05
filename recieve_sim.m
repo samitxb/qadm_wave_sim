@@ -1,6 +1,6 @@
-% ============================================================================
+% ==============================================================================
 % Simulation of recieving a sine like QADM project
-% ----------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 %
 % DESCRIPTION:
 % This script performs the following steps:
@@ -28,7 +28,7 @@
 
 % DATE: 2024-11-27
 % GNU Octave, version 8.4.0
-% ============================================================================
+% ==============================================================================
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                           Visual explaination
@@ -65,6 +65,7 @@ resampled_signal = resample(modulated_signal, p, q);
 t_resampled = (0:length(resampled_signal)-1) / f_sample_recieve;
 
 % FIR
+% New W for the FIR bc of the new sampling rate
 W = f_cutoff / nyquist;
 B = fir1(N_fir, W, 'low'); % filtercoefficients in B
 A = 1; % FIR always 1 in the denominator (deutsch - "Nenner")
@@ -129,5 +130,29 @@ xlabel('Frequency in Hz');
 ylabel('Amplitude');
 xlim([0, nyquist]);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure ('Name','sum multiplied by sin(wt) and cos(wt) of each frequency',
+        'NumberTitle','off');
+freq_count = 1;
+for f = frequencies
+    % Multiply with sin and cos carriers
+    A_sin_phi = resampled_signal .* sin(2*pi*f*t_resampled);
+    A_cos_phi = resampled_signal .* cos(2*pi*f*t_resampled);
 
+    % Filter the scaled results
+    A_sin_phi_filtered = filter(B, A, A_sin_phi);
+    A_cos_phi_filtered = filter(B, A, A_cos_phi);
 
+    % plotting every frequency
+    subplot(length(frequencies), 1, freq_count);
+    plot(t_resampled, A_sin_phi_filtered);
+    hold on;
+    plot(t_resampled, A_cos_phi_filtered);
+    hold off;
+    title([num2str(f/1e3) ' kHz']);
+    legend('A * sin * phi', 'A * cos * phi');
+    xlabel('time in sec');
+    ylabel('amplitude');
+    xlim([0, duration]);
+    freq_count = freq_count + 1;
+end

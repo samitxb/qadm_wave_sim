@@ -65,7 +65,9 @@ waveform_param;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dac_max = 2^dac_resolution - 1;                % Maximum DAC value
+dac_max = 2^dac_resolution - 1;           % Maximum DAC value
+b_max = 2^b_resolution - 1;               % Maximum B value - filter coefficient
+nyquist = f_sample/2;
 
 % time axis
 t = 0:1/f_sample:duration-(1/f_sample);
@@ -81,6 +83,7 @@ end
 sum_of_sines = sum_of_sines / max(abs(sum_of_sines)); % Normalize to [-1, 1]
 sum_of_sines = (sum_of_sines + 1) * (dac_max / 2);    % Scale to [0, dac_max]
 dac_signal = round(sum_of_sines);                    % Quantize
+dac_signal = uint64(dac_signal);
 
 % plot of the summed sines
 figure('Name','Sum of all sines and their FFT',
@@ -94,7 +97,7 @@ xlim([0, duration]);
 
 % spectral analysis
 N = length(dac_signal);
-freq_axis = linspace(0, f_sample/2, N/2+1); % axis upto f_sample/2
+freq_axis = linspace(0, nyquist, N/2+1); % axis upto nyquist freq (f_sample/2)
 Y = fft(dac_signal, N);
 Y_mag = abs(Y(1:N/2+1));
 
@@ -106,8 +109,15 @@ ylabel('amplitude');
 xlim([0, f_max_plot]);
 
 % FIR
-W = f_cutoff / (f_sample / 2);
+W = f_cutoff / nyquist;
 B = fir1(N_fir, W, 'low'); % filtercoefficients in B
+
+%Convert B from double to int
+B = B * b_max;
+B = round(B);
+B = uint64(B);
+
+
 A = 1; % FIR always 1 in the denominator (deutsch - "Nenner")
 
 % answer of the filter
@@ -127,7 +137,7 @@ xlim([0, duration]);
 
 % spectral analysis
 N = length(filtered_signal);
-freq_axis = linspace(0, f_sample/2, N/2+1); % axis upto f_sample/2
+freq_axis = linspace(0, nyquist, N/2+1); % axis upto nyquist
 Y = fft(filtered_signal, N);
 Y_mag = abs(Y(1:N/2+1));
 

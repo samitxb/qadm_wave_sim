@@ -8,10 +8,33 @@ f_sample = 40e6; % Sample-Frequency in Hz
 f_max_plot = 1.5e6;
 
 % simulation time in sec
-duration = 1e-9;
+duration = 1e-3;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PARAMETERS FOR CONVERTION FROM DOUBLE TO INT
+% ------------------------------------------
+% done by resolution representing the bits avaliable on hardware and using the
+% following methods:
+
+% 1. max_value = 2^resolution-1
 
 %DAC resolution in bits
-dac_resolution = 24;
+dac_resolution = 16; % max 64
+
+% See in code:
+%--------------
+%sum_of_sines = (sum_of_sines + 1) * (dac_max / 2);    % Scale to [0, dac_max]
+%dac_signal = round(sum_of_sines);                    % Quantize
+%dac_signal = uint64(dac_signal);
+
+%Resolution of coefficients B in bits
+b_resolution = 24; % max 64
+
+%See in code
+%-----------
+%B = B * b_max;
+%B = round(B);
+%B = uint64(B);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %FIR Parameter
