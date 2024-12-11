@@ -1,31 +1,41 @@
 % ==============================================================================
-% Simulation of recieving a sine like QADM project
 % ------------------------------------------------------------------------------
 %
 % DESCRIPTION:
-% This script performs the following steps:
-% 1.  Signal Preparation
-%     - dac_signal from waveform_sim multiplied by sin(wt) of his own frequency
-%     - resample that signal by the factor p, q, which will be output from he
-%       function rat() and the different sample frequencies.
-%       To resample, the function resample() will  be used.
-% 2.  Filter the signal with FIR
-%     - adjusted the factor W on the new sample frequency (B, A stay the same
-%       as in waveform_sim).
-%     - using the function filter() with the coeeficent calculated before
-% 3.  Ploting the results
+% This script simulates the receive process in a signal processing pipeline. It
+% performs the following key steps:
+%
+% 1. Signal Preparation:
+%    - Modulates a `dac_signal` from `waveform_sim` by multiplying it with
+%      a sine wave (`sin(wt)`) at its own frequency.
+%    - Resamples the modulated signal using the factors `p` and `q` obtained
+%      from the `rat()` function. The resampling adjusts the signal to a new
+%      sample frequency using `resample()`.
+%
+% 2. Filtering:
+%    - Applies an FIR low-pass filter to the resampled signal. The cutoff
+%      frequency is adjusted based on the new sampling rate.
+%    - The filter coefficients (`B`) are scaled and quantized before filtering.
+%
+% 3. Visualization:
+%    - Plots the original, resampled, and filtered signals over time.
+%    - Performs spectrum analysis on the resampled and filtered signals.
+%    - Visualizes the filtered signals multiplied by sine and cosine waves
+%      for each carrier frequency.
 %
 % PACKAGES: (pkg load)
 % - control:  https://gnu-octave.github.io/packages/control/
 % - signal:   https://gnu-octave.github.io/packages/signal/
 %
-% PARAMETER: recieve_param.m
+% PARAMETERS:
+% - This script uses configuration settings defined in `recieve_param.m`.
 %
 % OUTPUTS:
+% - Time-domain plots of the modulated, resampled, and filtered signals.
+% - Spectrum analysis of the resampled and filtered signals.
+% - Per-frequency visualization of filtered signal components (`A * sin(phi)`
+%   and `A * cos(phi)`).
 %
-% AUTHOR:   Sami Taieb,
-%           sami.taieb@ic-design.de
-
 % DATE: 2024-11-27
 % GNU Octave, version 8.4.0
 % ==============================================================================
@@ -39,6 +49,9 @@
 %                                    ^
 %                                    |
 %                             Störung: sin(wt)
+%                                    ^
+%                                    |
+%              gaussian = A * exp(-((t - u).^2) / (2 * sigma^2));
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -49,8 +62,17 @@ recieve_param;
 %Nyquist
 nyquist = f_sample_recieve/2;
 
+%Gauß Bell Function depending of duration
+A = 1;                 % Amplitude
+u = duration / 2;     % midpoint
+sigma = duration / 10; % Standardabweichung
+gaussian = A * exp(-((t - u).^2) / (2 * sigma^2));
+
+
 % generate the carrier signal
-carrier = sin(2 * pi * carrier_frequency * t);
+carrier = quantize(sin(2 * pi * carrier_frequency * t) .* gaussian, dac_resolution);
+
+
 
 % multiplication with the carrier signal
 modulated_signal = sum_of_sines .* carrier;
@@ -58,8 +80,12 @@ modulated_signal = sum_of_sines .* carrier;
 % resample of the modulated signal
 [p, q] = rat(f_sample_recieve / f_sample); %resampling factors
 
-% Resample of the signal
+% Resample of the signals modulated and carrier
+resampled_carrier = quantize(resample(carrier, p, q), dac_resolution);
+
+
 resampled_signal = resample(modulated_signal, p, q);
+
 
 % Time axis for the new sampled signal
 t_resampled = (0:length(resampled_signal)-1) / f_sample_recieve;
@@ -68,14 +94,19 @@ t_resampled = (0:length(resampled_signal)-1) / f_sample_recieve;
 % New W for the FIR bc of the new sampling rate
 W = f_cutoff / nyquist;
 B = fir1(N_fir, W, 'low'); % filtercoefficients in B
-A = 1; % FIR always 1 in the denominator (deutsch - "Nenner")
+%Convert B from double to int
+B = B * b_max;
+B = quantize(B, b_resolution);
+
+A = uint64(1); % FIR always 1 in the denominator (deutsch - "Nenner")
 
 % filtered signal
 filtered_signal = filter(B, A, resampled_signal);
+filtered_signal = quantize(filtered_signal, dac_resolution);
 
 
 
-figure('Name','recieved signal before, after resampling and filtered',
+figure('Name','RECIEVE: recieved signal before, after resampling and filtered',
        'NumberTitle','off');
 % recieved signal (x sin(wt))
 subplot(3, 1, 1);
@@ -102,7 +133,7 @@ ylabel('Amplitude');
 xlim([0, duration]);
 
 % spectrum analysis
-figure('Name','spectrum analysis of resampled signal and resampled filtered signal',
+figure('Name','RECIEVE: spectrum analysis of resampled signal and resampled filtered signal',
        'NumberTitle','off');
 % spectrum of the resampled
 N_resampled = length(resampled_signal);
@@ -131,17 +162,20 @@ ylabel('Amplitude');
 xlim([0, nyquist]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure ('Name','sum multiplied by sin(wt) and cos(wt) of each frequency',
+figure ('Name','RECIEVE: sum multiplied by sin(wt) and cos(wt) of each frequency',
         'NumberTitle','off');
 freq_count = 1;
 for f = frequencies
     % Multiply with sin and cos carriers
-    A_sin_phi = resampled_signal .* sin(2*pi*f*t_resampled);
-    A_cos_phi = resampled_signal .* cos(2*pi*f*t_resampled);
+    A_sin_phi = resampled_signal .* quantize(sin(2*pi*f*t_resampled), dac_resolution);
+    A_cos_phi = resampled_signal .* quantize(cos(2*pi*f*t_resampled), dac_resolution);
 
     % Filter the scaled results
     A_sin_phi_filtered = filter(B, A, A_sin_phi);
     A_cos_phi_filtered = filter(B, A, A_cos_phi);
+
+    A_sin_phi_filtered = quantize(A_sin_phi_filtered, dac_resolution);
+    A_cos_phi_filtered = quantize(A_cos_phi_filtered, dac_resolution);
 
     % plotting every frequency
     subplot(length(frequencies), 1, freq_count);
@@ -156,3 +190,5 @@ for f = frequencies
     xlim([0, duration]);
     freq_count = freq_count + 1;
 end
+
+
