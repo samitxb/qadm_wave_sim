@@ -82,6 +82,7 @@
 
 clear; clc; close all;
 waveform_param;
+plot_visibility;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -104,7 +105,7 @@ sum_of_sines = quantize(sum_of_sines, dac_resolution);
 
 % plot of the summed sines
 figure('Name','Sum of all sines and their FFT',
-       'NumberTitle','off');
+       'NumberTitle','off', 'Visible', vis_fig1);
 subplot(2, 1, 1);
 plot(t, sum_of_sines);
 title('sum of sines');
@@ -142,7 +143,7 @@ A = uint64(1); % FIR always 1 in the denominator (deutsch - "Nenner")
 filtered_signal = filter(B, A, sum_of_sines);
 
 figure('Name','Filtered sum of all sines and their FFT',
-       'NumberTitle','off');
+       'NumberTitle','off', 'Visible', vis_fig2);
 subplot(2, 1, 1);
 plot(t, filtered_signal);
 title('filtered signal');
@@ -165,7 +166,7 @@ xlim([0, f_max_plot]);
 
 % multiplication with sin(wt) und cos(wt) of each freq
 figure ('Name','sum multiplied by sin(wt) and cos(wt) of each frequency',
-        'NumberTitle','off');
+        'NumberTitle','off', 'Visible', vis_fig3);
 freq_count = 1;
 for f = frequencies
     % Multiply with sin and cos carriers
@@ -194,8 +195,8 @@ for f = frequencies
 end
 
 % plot of the filter answer
-figure('Name','Betrag und Phase mit Filterkoeffizienten B, A(=1).',
-       'NumberTitle','off');
+figure('Name','complex frequency response H of the filter',
+       'NumberTitle','off', 'Visible',vis_fig4);
 freqz(B, A, 4e6);
 
 

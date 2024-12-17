@@ -107,7 +107,8 @@ filtered_signal = quantize(filtered_signal, dac_resolution);
 
 
 figure('Name','RECIEVE: recieved signal before, after resampling and filtered',
-       'NumberTitle','off');
+       'NumberTitle','off',
+       'Visible', vis_fig5);
 % recieved signal (x sin(wt))
 subplot(3, 1, 1);
 plot(t, modulated_signal);
@@ -134,7 +135,8 @@ xlim([0, duration]);
 
 % spectrum analysis
 figure('Name','RECIEVE: spectrum analysis of resampled signal and resampled filtered signal',
-       'NumberTitle','off');
+       'NumberTitle','off',
+       'Visible', vis_fig6);
 % spectrum of the resampled
 N_resampled = length(resampled_signal);
 freq_axis_resampled = linspace(0, nyquist, N_resampled/2+1);
@@ -163,7 +165,8 @@ xlim([0, nyquist]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 figure ('Name','RECIEVE: sum multiplied by sin(wt) and cos(wt) of each frequency',
-        'NumberTitle','off');
+        'NumberTitle','off',
+        'Visible', vis_fig7);
 freq_count = 1;
 for f = frequencies
     % Multiply with sin and cos carriers

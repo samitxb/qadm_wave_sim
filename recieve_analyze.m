@@ -34,7 +34,9 @@ close all;
 difference_signal = resampled_carrier - filtered_signal;
 
 
-figure;
+figure ('Name','RECIEVE: modulated signal, filtered signal, and signaldifference',
+        'NumberTitle','off',
+        'Visible', vis_fig8);
 % Moduliertes Signal
 subplot(3, 1, 1);
 plot(t_resampled, resampled_carrier);
@@ -63,7 +65,9 @@ xlim([0, duration]);
 %close all;
 num_frequencies = length(frequencies);
 
-figure('Name', 'Receive: Analysis for all Frequencies', 'NumberTitle', 'off');
+figure ('Name', 'Receive: Analysis for all Frequencies',
+        'NumberTitle', 'off',
+        'Visible', vis_fig9);
 grid on;
 
 for i = 1:num_frequencies
