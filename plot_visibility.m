@@ -23,8 +23,8 @@ vis_fig7 = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%
 
-%% RECIEVE: RECIEVE: modulated signal, filtered signal, and signaldifference
+%% RECIEVE: modulated signal, filtered signal, and signaldifference
 vis_fig8 = false;
 
-%% RECIEVE: Receive: Analysis for all Frequencies
+%% RECIEVE: Analysis for all Frequencies
 vis_fig9 = true;

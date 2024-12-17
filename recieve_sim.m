@@ -64,7 +64,7 @@ nyquist = f_sample_recieve/2;
 
 %Gauß Bell Function depending of duration
 A = 1;                 % Amplitude
-u = duration / 2;     % midpoint
+u = duration * 0.75;     % midpoint
 sigma = duration / 10; % Standardabweichung
 gaussian = A * exp(-((t - u).^2) / (2 * sigma^2));
 

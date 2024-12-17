@@ -43,7 +43,7 @@ plot(t_resampled, resampled_carrier);
 title('resampled carrier');
 xlabel('time in sec');
 ylabel('Amplitude');
-xlim([0, duration]);
+xlim([duration/2, duration]);
 
 % Gefiltertes Signal
 subplot(3, 1, 2);
@@ -51,7 +51,7 @@ plot(t_resampled, filtered_signal);
 title('filtered signal');
 xlabel('Time in sec');
 ylabel('Amplitude');
-xlim([0, duration]);
+xlim([duration/2, duration]);
 
 % Unterschiedssignal
 subplot(3, 1, 3);
@@ -59,7 +59,7 @@ plot(t_resampled, difference_signal);
 title('Difference between modulated and filtered');
 xlabel('Zeit (s)');
 ylabel('Amplitude');
-xlim([0, duration]);
+xlim([duration/2, duration]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %close all;
@@ -81,15 +81,15 @@ for i = 1:num_frequencies
     A_sin_phi = resampled_signal .* quantize(sin(2 * pi * f * t_resampled), dac_resolution);
     A_cos_phi = resampled_signal .* quantize(cos(2 * pi * f * t_resampled), dac_resolution);
     plot(t_resampled, A_sin_phi, t_resampled, A_cos_phi);
-    legend('A * sin(phi)', 'A * cos(phi)', 'Location', 'best');
+    legend('A * sin(phi)', 'A * cos(phi)', 'Location', 'northeast');
     title(['Frequency' num2str(f/1e3) ' kHz: Signal with Carrier']);
     xlabel('Time (s)');
     ylabel('Amplitude');
-    xlim([0, duration]);
+    xlim([duration/2, duration]);
 
     % Plot 2: Resampled carrier
 
-    [min_time, min_index, min_value] = find_minimum(resampled_carrier, t_resampled, 0.0002, 1);
+    [min_time, min_index, min_value] = find_minimum(resampled_carrier, t_resampled, 0.0015, 1);
 
     subplot(rows, cols, (i - 1) * cols + 2);
     plot(t_resampled, resampled_carrier);
@@ -108,13 +108,13 @@ for i = 1:num_frequencies
     title('Resampled Carrier');
     xlabel('Time (s)');
     ylabel('Amplitude');
-    xlim([0, duration]);
+    xlim([duration/2, duration]);
 
     % Plot 3: Filtered signal
     A_sin_phi_filtered = quantize(filter(B, A, A_sin_phi), dac_resolution);
     A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
 
-    [min_time, min_index, min_value] = find_minimum(A_sin_phi_filtered, t_resampled, 0.0005, 1);
+    [min_time, min_index, min_value] = find_minimum(A_sin_phi_filtered, t_resampled, 0.0015, 1);
 
     subplot(rows, cols, (i - 1) * cols + 3);
     plot(t_resampled, A_sin_phi_filtered, t_resampled, A_cos_phi_filtered);
@@ -133,7 +133,7 @@ for i = 1:num_frequencies
     title('Filtered Signal');
     xlabel('Time (s)');
     ylabel('Amplitude');
-    xlim([0, duration]);
+    xlim([duration/2, duration]);
 
     % Plot 4: Difference signal
     difference_signal = resampled_carrier - A_sin_phi_filtered;
@@ -142,11 +142,11 @@ for i = 1:num_frequencies
     title('Difference Signal');
     xlabel('Time (s)');
     ylabel('Amplitude');
-    xlim([0, duration]);
+    xlim([duration/2, duration]);
 end
 
-delta_t = abs(find_minimum(resampled_carrier, t_resampled, 0.0005, 1) - ...
-              find_minimum(A_sin_phi_filtered, t_resampled, 0.0005, 1));
+delta_t = abs(find_minimum(resampled_carrier, t_resampled, 0.0015, 1) - ...
+              find_minimum(A_sin_phi_filtered, t_resampled, 0.0015, 1));
 
 phase_shift = delta_t * carrier_frequency * 360;
 phase_shift_rad = delta_t * carrier_frequency * 2 * pi;

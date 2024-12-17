@@ -8,7 +8,7 @@ f_sample = 40e6; % Sample-Frequency in Hz
 f_max_plot = 1.5e6;
 
 % simulation time in sec
-duration = 1e-3;
+duration = (1e-3)*2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PARAMETERS FOR CONVERTION FROM DOUBLE TO INT
 % ------------------------------------------
