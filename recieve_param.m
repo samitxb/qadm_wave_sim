@@ -1,5 +1,5 @@
 %störsignal frequenz
-carrier_frequency = 1e3;
+carrier_frequency = (1e3);
 
 %abtastrate
 f_sample_recieve = 4e6;

@@ -89,7 +89,8 @@ for i = 1:num_frequencies
 
     % Plot 2: Resampled carrier
 
-    [min_time, min_index, min_value] = find_minimum(resampled_carrier, t_resampled, 0.0015, 1);
+    [min_time, min_index, min_value] = find_minimum(resampled_carrier, t_resampled, duration * 0.75, 1);
+    %0.0015
 
     subplot(rows, cols, (i - 1) * cols + 2);
     plot(t_resampled, resampled_carrier);
@@ -114,7 +115,7 @@ for i = 1:num_frequencies
     A_sin_phi_filtered = quantize(filter(B, A, A_sin_phi), dac_resolution);
     A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
 
-    [min_time, min_index, min_value] = find_minimum(A_sin_phi_filtered, t_resampled, 0.0015, 1);
+    [min_time, min_index, min_value] = find_minimum(A_sin_phi_filtered, t_resampled, duration * 0.75, 1);
 
     subplot(rows, cols, (i - 1) * cols + 3);
     plot(t_resampled, A_sin_phi_filtered, t_resampled, A_cos_phi_filtered);
@@ -136,7 +137,123 @@ for i = 1:num_frequencies
     xlim([duration/2, duration]);
 
     % Plot 4: Difference signal
-    difference_signal = resampled_carrier - A_sin_phi_filtered;
+    difference_signal = double(resampled_carrier) - double(A_sin_phi_filtered);
+    subplot(rows, cols, (i - 1) * cols + 4);
+    plot(t_resampled, difference_signal);
+    title('Difference Signal');
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    xlim([duration/2, duration]);
+    ylim([-32e3, 32e3]);
+end
+
+delta_t = abs(find_minimum(resampled_carrier, t_resampled, duration * 0.75, 1) - ...
+              find_minimum(A_sin_phi_filtered, t_resampled, duration * 0.75, 1));
+
+phase_shift = delta_t * carrier_frequency * 360;
+phase_shift_rad = delta_t * carrier_frequency * 2 * pi;
+
+figure ('Name', 'Receive: Analysis for all Frequencies',
+        'NumberTitle', 'off',
+        'Visible', vis_fig10);
+
+for i = 1:num_frequencies
+    f = frequencies(i);
+
+    rows = num_frequencies;
+    cols = 4; % 4 Plots / Frequency
+
+    % Plot 1: A * sin(phi) und A * cos(phi)
+    subplot(rows, cols, (i - 1) * cols + 1);
+    A_sin_phi = resampled_signal .* quantize(sin(2 * pi * f * t_resampled), dac_resolution);
+    A_cos_phi = resampled_signal .* quantize(cos(2 * pi * f * t_resampled), dac_resolution);
+    plot(t_resampled, A_sin_phi, t_resampled, A_cos_phi);
+    legend('A * sin(phi)', 'A * cos(phi)', 'Location', 'northeast');
+    title(['Frequency' num2str(f/1e3) ' kHz: Signal with Carrier']);
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    xlim([duration/2, duration]);
+
+    % Plot 2: sqrt(A_sin_phi² + A_cos_phi²)
+    sinxcos = sqrt(A_sin_phi.*A_sin_phi .+ A_cos_phi.*A_cos_phi);
+
+    A_sin_phi_filtered = quantize(filter(B, A, A_sin_phi), dac_resolution);
+    A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
+
+    sinxcos_filtered = sqrt(A_sin_phi_filtered.*A_sin_phi_filtered .+ ...
+                            A_cos_phi_filtered.*A_cos_phi_filtered);
+
+    subplot(rows, cols, (i - 1) * cols + 2);
+    plot(t_resampled, sinxcos, t_resampled, sinxcos_filtered);
+
+    title('sqrt(A_sin_phi² + A_cos_phi²) and same with filtered signals');
+    legend ('sqrt(sin²+cos²)',
+            'FILTERED SIGNALS: sqrt(sin²+cos²)',
+            'Location', 'northeast');
+
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    xlim([duration/2, duration]);
+
+    %Plot 3:
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+figure ('Name', 'Receive: Analysis for all Frequencies',
+        'NumberTitle', 'off',
+        'Visible', vis_fig11);
+grid on;
+
+for i = 1:num_frequencies
+    f = frequencies(i);
+
+    rows = num_frequencies;
+    cols = 4; % 4 Plots / Frequency
+
+    % Plot 1: A * sin(phi) und A * cos(phi)
+    subplot(rows, cols, (i - 1) * cols + 1);
+    A_sin_phi = resampled_signal .* quantize(sin(2 * pi * f * t_resampled), dac_resolution);
+    A_cos_phi = resampled_signal .* quantize(cos(2 * pi * f * t_resampled), dac_resolution);
+    plot(t_resampled, A_sin_phi, t_resampled, A_cos_phi);
+    legend('A * sin(phi)', 'A * cos(phi)', 'Location', 'northeast');
+    title(['Frequency' num2str(f/1e3) ' kHz: Signal with Carrier']);
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    xlim([duration/2, duration]);
+
+    % Plot 2: Resampled carrier
+
+    subplot(rows, cols, (i - 1) * cols + 2);
+    plot(t_resampled, resampled_carrier);
+    title('Resampled Carrier');
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    xlim([duration/2, duration]);
+
+    % Plot 3: Filtered signal
+    A_sin_phi_filtered = quantize(filter(B, A, A_sin_phi), dac_resolution);
+    A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
+
+    %[min_time, min_index, min_value] = find_minimum(A_sin_phi_filtered, t_resampled, duration * 0.75, 1);
+
+    A_sin_phi_filtered_backshifted = ...
+    backshift(resampled_carrier, A_sin_phi_filtered, t_resampled, duration * 0.75);
+
+    A_cos_phi_filtered_backshifted = ...
+    backshift(resampled_carrier, A_cos_phi_filtered, t_resampled, duration * 0.75);
+
+
+    subplot(rows, cols, (i - 1) * cols + 3);
+    plot(t_resampled, A_sin_phi_filtered_backshifted);
+
+    title('Filtered, Backshifted Signal');
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    xlim([duration/2, duration]);
+
+    % Plot 4: Difference signal
+    difference_signal = double(resampled_carrier) - double(A_sin_phi_filtered_backshifted);
     subplot(rows, cols, (i - 1) * cols + 4);
     plot(t_resampled, difference_signal);
     title('Difference Signal');
@@ -144,9 +261,3 @@ for i = 1:num_frequencies
     ylabel('Amplitude');
     xlim([duration/2, duration]);
 end
-
-delta_t = abs(find_minimum(resampled_carrier, t_resampled, 0.0015, 1) - ...
-              find_minimum(A_sin_phi_filtered, t_resampled, 0.0015, 1));
-
-phase_shift = delta_t * carrier_frequency * 360;
-phase_shift_rad = delta_t * carrier_frequency * 2 * pi;

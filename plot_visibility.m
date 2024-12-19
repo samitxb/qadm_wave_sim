@@ -28,3 +28,7 @@ vis_fig8 = false;
 
 %% RECIEVE: Analysis for all Frequencies
 vis_fig9 = true;
+
+vis_fig10 = false;
+
+vis_fig11 = true;
