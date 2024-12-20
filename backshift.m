@@ -1,9 +1,9 @@
-function [signal_backshifted, shift] = backshift(signal1, signal2, t, t_start)
+function [signal_backshifted, shift] = backshift(signal1, signal2)
 
-    [~, min_index1] = find_minimum(signal1, t, t_start, 1);
+    [~, min_index1] = min(signal1((length(signal1)/2):end));
 
 
-    [~, min_index2] = find_minimum(signal2, t, t_start, 1);
+    [~, min_index2] = min(signal2((length(signal2)/2):end));
 
     shift = min_index2 - min_index1;
 

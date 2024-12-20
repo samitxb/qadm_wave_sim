@@ -38,5 +38,5 @@ b_resolution = 24; % max 64
 
 
 %FIR Parameter
-N_fir = 1023; % order >> Tabs of B equals N_fir + 1
+N_fir = 127; % order >> Tabs of B equals N_fir + 1
 f_cutoff = 4e3; % Cut-Off-Frequency in Hz

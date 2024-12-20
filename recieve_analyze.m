@@ -236,17 +236,15 @@ for i = 1:num_frequencies
     A_sin_phi_filtered = quantize(filter(B, A, A_sin_phi), dac_resolution);
     A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
 
-    %[min_time, min_index, min_value] = find_minimum(A_sin_phi_filtered, t_resampled, duration * 0.75, 1);
-
     A_sin_phi_filtered_backshifted = ...
-    backshift(resampled_carrier, A_sin_phi_filtered, t_resampled, duration * 0.75);
+    backshift(resampled_carrier, A_sin_phi_filtered);
 
     A_cos_phi_filtered_backshifted = ...
-    backshift(resampled_carrier, A_cos_phi_filtered, t_resampled, duration * 0.75);
+    backshift(resampled_carrier, A_cos_phi_filtered);
 
 
     subplot(rows, cols, (i - 1) * cols + 3);
-    plot(t_resampled, A_sin_phi_filtered_backshifted);
+    plot(t_resampled, A_sin_phi_filtered_backshifted, t_resampled, resampled_carrier);
 
     title('Filtered, Backshifted Signal');
     xlabel('Time (s)');
