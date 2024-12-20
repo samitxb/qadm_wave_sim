@@ -195,8 +195,6 @@ for i = 1:num_frequencies
     xlabel('Time (s)');
     ylabel('Amplitude');
     xlim([duration/2, duration]);
-
-    %Plot 3:
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -205,6 +203,9 @@ figure ('Name', 'Receive: Analysis for all Frequencies',
         'NumberTitle', 'off',
         'Visible', vis_fig11);
 grid on;
+
+sum_of_differences = zeros(size(t_resampled));
+%sum_of_integrals_dif = 0;
 
 for i = 1:num_frequencies
     f = frequencies(i);
@@ -252,7 +253,10 @@ for i = 1:num_frequencies
     xlim([duration/2, duration]);
 
     % Plot 4: Difference signal
-    difference_signal = double(resampled_carrier) - double(A_sin_phi_filtered_backshifted);
+    difference_signal = int64(resampled_carrier) - int64(A_sin_phi_filtered_backshifted);
+    sum_of_differences = sum_of_differences .+ abs(difference_signal);
+
+    %sum_of_integrals_dif = sum_of_integrals_dif + trapz(t_resampled, difference_signal);
     subplot(rows, cols, (i - 1) * cols + 4);
     plot(t_resampled, difference_signal);
     title('Difference Signal');
