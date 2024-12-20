@@ -9,6 +9,9 @@ f_max_plot = 1.5e6;
 
 % simulation time in sec
 duration = (1e-3)*2;
+
+%expanding the sim time to not get out of data in recieve_analyze.m
+expand_sim_factor = 1.25;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PARAMETERS FOR CONVERTION FROM DOUBLE TO INT
 % ------------------------------------------
@@ -38,5 +41,5 @@ b_resolution = 24; % max 64
 
 
 %FIR Parameter
-N_fir = 1023; % order >> Tabs of B equals N_fir + 1
+N_fir = 63; % order >> Tabs of B equals N_fir + 1
 f_cutoff = 4e3; % Cut-Off-Frequency in Hz

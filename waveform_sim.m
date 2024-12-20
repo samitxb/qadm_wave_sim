@@ -92,7 +92,7 @@ b_max = 2^b_resolution - 1;               % Maximum B value - filter coefficient
 nyquist = f_sample/2;
 
 % time axis
-t = 0:1/f_sample:duration-(1/f_sample);
+t = 0:1/f_sample:(expand_sim_factor*duration)-(1/f_sample);
 
 % Generate individual sine waves and scale to DAC range
 sum_of_sines = zeros(size(t));

@@ -115,8 +115,8 @@ for i = 1:num_frequencies
     A_sin_phi_filtered = quantize(filter(B, A, A_sin_phi), dac_resolution);
     A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
 
-    [min_value, min_index] = min(A_sin_phi_filtered((length(A_sin_phi_filtered)/2):end));
-    min_time = t_resampled(min_index + (length(A_sin_phi_filtered)/2));
+    [min_value, min_index] = min(A_sin_phi_filtered((length(A_sin_phi_filtered)/2*expand_sim_factor):end));
+    min_time = t_resampled(min_index + (length(A_sin_phi_filtered)/2*expand_sim_factor));
 
     subplot(rows, cols, (i - 1) * cols + 3);
     plot(t_resampled, A_sin_phi_filtered, t_resampled, A_cos_phi_filtered);
@@ -147,12 +147,6 @@ for i = 1:num_frequencies
     xlim([duration/2, duration]);
     ylim([-32e3, 32e3]);
 end
-
-delta_t = abs(find_minimum(resampled_carrier, t_resampled, duration * 0.75, 1) - ...
-              find_minimum(A_sin_phi_filtered, t_resampled, duration * 0.75, 1));
-
-phase_shift = delta_t * carrier_frequency * 360;
-phase_shift_rad = delta_t * carrier_frequency * 2 * pi;
 
 figure ('Name', 'Receive: Analysis for all Frequencies',
         'NumberTitle', 'off',
@@ -238,10 +232,10 @@ for i = 1:num_frequencies
     A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
 
     A_sin_phi_filtered_backshifted = ...
-    backshift(resampled_carrier, A_sin_phi_filtered);
+    backshift(resampled_carrier, A_sin_phi_filtered, expand_sim_factor);
 
     A_cos_phi_filtered_backshifted = ...
-    backshift(resampled_carrier, A_cos_phi_filtered);
+    backshift(resampled_carrier, A_cos_phi_filtered, expand_sim_factor);
 
 
     subplot(rows, cols, (i - 1) * cols + 3);
