@@ -89,8 +89,8 @@ for i = 1:num_frequencies
 
     % Plot 2: Resampled carrier
 
-    [min_time, min_index, min_value] = find_minimum(resampled_carrier, t_resampled, duration * 0.75, 1);
-    %0.0015
+    [min_value, min_index] = min(resampled_carrier);
+    min_time = t_resampled(min_index);
 
     subplot(rows, cols, (i - 1) * cols + 2);
     plot(t_resampled, resampled_carrier);
@@ -115,7 +115,8 @@ for i = 1:num_frequencies
     A_sin_phi_filtered = quantize(filter(B, A, A_sin_phi), dac_resolution);
     A_cos_phi_filtered = quantize(filter(B, A, A_cos_phi), dac_resolution);
 
-    [min_time, min_index, min_value] = find_minimum(A_sin_phi_filtered, t_resampled, duration * 0.75, 1);
+    [min_value, min_index] = min(A_sin_phi_filtered((length(A_sin_phi_filtered)/2):end));
+    min_time = t_resampled(min_index + (length(A_sin_phi_filtered)/2));
 
     subplot(rows, cols, (i - 1) * cols + 3);
     plot(t_resampled, A_sin_phi_filtered, t_resampled, A_cos_phi_filtered);
