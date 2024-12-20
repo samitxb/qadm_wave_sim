@@ -1,4 +1,4 @@
-function [min_time, min_index, min_value] = find_smooth_minimum(signal, t, t_start, n)
+function [min_time, min_index, min_value] = find_minimum(signal, t, t_start, n)
     smoothing = 50; %smoothing factor
 
     % to get smooth signal: Moving-Average-Filter
